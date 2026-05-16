@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zufallsteams</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-50 text-zinc-900">
+  <main class="mx-auto max-w-3xl p-6">
+    <h1 class="mb-6 text-3xl font-bold">Zufallsteams</h1>
+
+    <section class="grid gap-4 sm:grid-cols-[1fr_160px]">
+      <label class="block">
+        <span class="mb-2 block font-medium">Studierende</span>
+        <textarea id="names" class="h-64 w-full rounded-lg border border-zinc-300 p-3 shadow-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-200" placeholder="Ein Name pro Zeile"></textarea>
+      </label>
+
+      <div class="space-y-4">
+        <label class="block">
+          <span class="mb-2 block font-medium">Gruppengröße</span>
+          <input id="size" type="number" min="2" value="2" class="w-full rounded-lg border border-zinc-300 p-3 shadow-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-200">
+        </label>
+        <button id="make" class="w-full rounded-lg bg-teal-700 px-4 py-3 font-semibold text-white shadow-sm hover:bg-teal-800">Gruppen bilden</button>
+      </div>
+    </section>
+
+    <p id="hint" class="mt-4 text-sm text-zinc-600"></p>
+    <section id="groups" class="mt-6 grid gap-4 sm:grid-cols-2"></section>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const esc = text => text.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
+
+    $("make").onclick = () => {
+      const names = $("names").value.split(/\n|,/).map(n => n.trim()).filter(Boolean);
+      const size = Math.max(2, Number($("size").value) || 2);
+      const shuffled = names.sort(() => Math.random() - 0.5);
+      if (!names.length) {
+        $("hint").textContent = "Bitte zuerst Namen eingeben.";
+        $("groups").innerHTML = "";
+        return;
+      }
+
+      const groupCount = Math.max(1, Math.floor(shuffled.length / size));
+      const groups = Array.from({ length: groupCount }, () => []);
+
+      shuffled.forEach((name, i) => groups[i % groupCount].push(name));
+
+      $("hint").textContent = `${names.length} Studierende in ${groups.length} Gruppen.`;
+
+      $("groups").innerHTML = groups.map((group, i) => `
+        <article class="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+          <h2 class="mb-3 font-semibold text-teal-800">Gruppe ${i + 1} (${group.length})</h2>
+          <ol class="list-decimal space-y-1 pl-5">${group.map(name => `<li>${esc(name)}</li>`).join("")}</ol>
+        </article>
+      `).join("");
+    };
+  </script>
+</body>
+</html>
